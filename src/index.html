@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="StoryApp - Share your stories with the Dicoding community">
+    <meta name="theme-color" content="#2196F3">
+    
+    <link rel="shortcut icon" href="favicon.png">
+    <link rel="apple-touch-icon" href="/images/icons/icon-192x192.png">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <title>StoryApp</title>
+  </head>
+  <body>
+    <!-- Skip to content link for accessibility -->
+    <a href="#main-content" class="skip-link">Skip to content</a>
+    
+    <header>
+      <div class="main-header container">
+        <a class="brand-name" href="#/">StoryApp</a>
+
+        <nav id="navigation-drawer" class="navigation-drawer">
+          <ul id="nav-list" class="nav-list">
+            <li><a href="#/">Beranda</a></li>
+            <li><a href="#/stories">Stories</a></li>
+            <li><a href="#/favorites">Favorites</a></li>
+            <li><a href="#/about">About</a></li>
+          </ul>
+        </nav>
+
+        <button id="drawer-button" class="drawer-button" aria-label="Open navigation menu">☰</button>
+      </div>
+    </header>
+
+    <main id="main-content" class="main-content"></main>
+    
+    <footer class="footer">
+      <div class="container">
+        <p>&copy; 2025 StoryApp - Dicoding Submission</p>
+      </div>
+    </footer>
+    
+    <!-- Install prompt container -->
+    <div id="install-app" class="install-container" style="display: none;">
+      <div class="install-content">
+        <p>Install StoryApp for a better experience!</p>
+        <div class="install-actions">
+          <button id="install-button" class="install-button">Install</button>
+          <button id="close-install" class="close-install">Not Now</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Load scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+  </body>
+</html>
