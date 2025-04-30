@@ -36,7 +36,7 @@ const PushNotificationHelper = {
     try {
       const registration = await navigator.serviceWorker.ready;
       
-      // Ubah base64 VAPID key menjadi Uint8Array
+      // Konversi VAPID key yang benar
       const vapidPublicKey = CONFIG.VAPID_PUBLIC_KEY;
       const convertedVapidKey = this._urlBase64ToUint8Array(vapidPublicKey);
       
@@ -49,16 +49,23 @@ const PushNotificationHelper = {
       // Kirim subscription ke server jika user sudah login
       if (AuthService.isLoggedIn()) {
         const token = AuthService.getToken();
-        await ApiService.subscribeNotification({
-          token,
+        
+        const formattedSubscription = {
           endpoint: subscription.endpoint,
           keys: {
             p256dh: btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('p256dh')))),
-            auth: btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('auth')))),
+            auth: btoa(String.fromCharCode.apply(null, new Uint8Array(subscription.getKey('auth'))))
           },
+        };
+        
+        await ApiService.subscribeNotification({
+          token,
+          subscription: formattedSubscription
         });
-        console.log('Successfully subscribed to push notifications');
-        return subscription;
+        
+        console.log('Successfully subscribed to push notifications API');
+      } else {
+        console.log('User not logged in, skipping API subscription');
       }
       
       return subscription;
@@ -87,6 +94,8 @@ const PushNotificationHelper = {
           token,
           endpoint: subscription.endpoint,
         });
+        
+        console.log('Successfully unsubscribed from push notifications API');
       }
       
       return success;

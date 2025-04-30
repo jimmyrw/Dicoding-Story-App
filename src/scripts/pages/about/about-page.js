@@ -1,3 +1,5 @@
+import PushNotificationHelper from '../../utils/push-notification-helper';
+
 export default class AboutPage {
   async render() {
     return `
@@ -31,12 +33,146 @@ export default class AboutPage {
             </ul>
           </div>
           
-         
+          <div class="developer-info">
+            <h2>Dikembangkan Oleh</h2>
+            <p>Nama: Esteh</p>
+            <p>Kelas: Front-End Web Developer Expert</p>
+          </div>
+          
+          <div class="notification-section">
+            <h2>Notification Settings</h2>
+            <p>Enable push notifications to stay updated with new stories.</p>
+            
+            <div class="notification-actions">
+              <button id="subscribe-button" class="primary-button">
+                <i class="fas fa-bell"></i> Subscribe to Notifications
+              </button>
+              
+              <button id="unsubscribe-button" class="secondary-button">
+                <i class="fas fa-bell-slash"></i> Unsubscribe from Notifications
+              </button>
+            </div>
+            
+            <div id="notification-status" class="notification-status mt-3"></div>
+          </div>
+        </div>
+      </section>
     `;
   }
 
   async afterRender() {
-    // Add any interactivity or additional functionality here if needed
     document.title = 'About StoryApp';
+    
+    // Setup notification buttons
+    this._setupNotificationButtons();
+    
+    // Check current subscription status
+    this._checkSubscriptionStatus();
+  }
+  
+  async _setupNotificationButtons() {
+    const subscribeButton = document.getElementById('subscribe-button');
+    const unsubscribeButton = document.getElementById('unsubscribe-button');
+    const statusContainer = document.getElementById('notification-status');
+    
+    if (!subscribeButton || !unsubscribeButton || !statusContainer) {
+      console.error('Notification elements not found');
+      return;
+    }
+    
+    subscribeButton.addEventListener('click', async () => {
+      try {
+        statusContainer.innerHTML = '<p class="loading">Requesting permission...</p>';
+        
+        // Request permission
+        const permission = await PushNotificationHelper.requestPermission();
+        if (!permission) {
+          statusContainer.innerHTML = '<p class="error">Permission denied. Please enable notifications in your browser settings.</p>';
+          return;
+        }
+        
+        // Subscribe to push
+        statusContainer.innerHTML = '<p class="loading">Subscribing to notifications...</p>';
+        const subscription = await PushNotificationHelper.subscribeUserToPush();
+        
+        if (subscription) {
+          statusContainer.innerHTML = '<p class="success">Successfully subscribed to notifications!</p>';
+          this._checkSubscriptionStatus();
+        } else {
+          statusContainer.innerHTML = '<p class="error">Failed to subscribe to notifications. Please try again.</p>';
+        }
+      } catch (error) {
+        console.error('Error subscribing to notifications:', error);
+        statusContainer.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+      }
+    });
+    
+    unsubscribeButton.addEventListener('click', async () => {
+      try {
+        statusContainer.innerHTML = '<p class="loading">Unsubscribing from notifications...</p>';
+        
+        const success = await PushNotificationHelper.unsubscribeFromPush();
+        
+        if (success) {
+          statusContainer.innerHTML = '<p class="success">Successfully unsubscribed from notifications.</p>';
+          this._checkSubscriptionStatus();
+        } else {
+          statusContainer.innerHTML = '<p class="error">Failed to unsubscribe from notifications.</p>';
+        }
+      } catch (error) {
+        console.error('Error unsubscribing from notifications:', error);
+        statusContainer.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+      }
+    });
+  }
+  
+  async _checkSubscriptionStatus() {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      console.log('Push notification not supported');
+      return;
+    }
+    
+    const subscribeButton = document.getElementById('subscribe-button');
+    const unsubscribeButton = document.getElementById('unsubscribe-button');
+    const statusContainer = document.getElementById('notification-status');
+    
+    if (!subscribeButton || !unsubscribeButton) {
+      return;
+    }
+    
+    try {
+      // Check if browser supports notification
+      if (!('Notification' in window)) {
+        subscribeButton.disabled = true;
+        unsubscribeButton.disabled = true;
+        statusContainer.innerHTML = '<p class="error">Your browser does not support notifications</p>';
+        return;
+      }
+      
+      // Check current permission
+      if (Notification.permission === 'denied') {
+        subscribeButton.disabled = true;
+        unsubscribeButton.disabled = true;
+        statusContainer.innerHTML = '<p class="error">Notification permission denied. Please enable in your browser settings.</p>';
+        return;
+      }
+      
+      // Check if already subscribed
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.getSubscription();
+      
+      if (subscription) {
+        subscribeButton.disabled = true;
+        unsubscribeButton.disabled = false;
+        statusContainer.innerHTML = '<p class="success">You are currently subscribed to notifications</p>';
+      } else {
+        subscribeButton.disabled = false;
+        unsubscribeButton.disabled = true;
+        statusContainer.innerHTML = '<p class="info">You are not subscribed to notifications</p>';
+      }
+    } catch (error) {
+      console.error('Error checking subscription status:', error);
+      statusContainer.innerHTML = `<p class="error">Error checking notification status: ${error.message}</p>`;
+    }
   }
 }
